@@ -4,6 +4,10 @@ This project is a Real-World Multi-Agent AI System built using LangGraph.
 
 The system uses 4 AI agents that work together to plan a complete trip automatically.
 
+## Architecture
+
+![Multi-AI Agent Architecture](multi-ai-agent-architecture.png)
+
 ## Features
 
 - ✈️ Flight Search Agent
