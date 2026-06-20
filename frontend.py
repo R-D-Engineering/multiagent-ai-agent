@@ -137,19 +137,35 @@ div[data-testid="stButton"] > button:active {
     background: #0e1a2e !important;
     border: 1px solid #1e3050 !important;
     border-radius: 12px !important;
+    margin: 0.75rem 0 !important;
 }
 [data-testid="stStatusWidget"] > div:first-child {
     background: #0e1a2e !important;
     border-radius: 12px 12px 0 0 !important;
 }
-[data-testid="stStatusWidget"] details,
-[data-testid="stStatusWidget"] details > div,
+[data-testid="stStatusWidget"] summary {
+    color: #e0edf8 !important;
+    font-weight: 600 !important;
+    padding: 0.8rem !important;
+    cursor: pointer !important;
+    user-select: none !important;
+}
+[data-testid="stStatusWidget"] summary:hover {
+    background: rgba(58, 123, 213, 0.15) !important;
+}
+[data-testid="stStatusWidget"] details[open] > summary {
+    border-bottom: 1px solid #1e3050 !important;
+}
+[data-testid="stStatusWidget"] details {
+    background: #0a1520 !important;
+    color: #e0edf8 !important;
+}
 [data-testid="stStatusWidget"] [data-testid="stVerticalBlock"] {
     background: #0a1520 !important;
-    color: #ffffff !important;
-    padding: 0.25rem 0.5rem !important;
+    color: #e0edf8 !important;
+    padding: 1rem !important;
 }
-[data-testid="stStatusWidget"] * { color: #ffffff !important; }
+[data-testid="stStatusWidget"] * { color: #e0edf8 !important; }
 [data-testid="stStatusWidget"] a { color: #4ea8f0 !important; }
 [data-testid="stStatusWidget"] hr { border-color: #1e3050 !important; }
 
@@ -209,16 +225,26 @@ section[data-testid="stSidebar"] {
     background: #090e18 !important;
     border-right: 1px solid #141f30 !important;
 }
+section[data-testid="stSidebar"] > div {
+    background: #090e18 !important;
+}
 .sidebar-chip {
     background: #0e1a2b;
     border: 1px solid #1a2e44;
     border-radius: 8px;
-    padding: 0.45rem 0.75rem;
-    margin-bottom: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    margin-bottom: 0.5rem;
     font-size: 0.83rem;
     color: #7aa8cc;
+    display: block !important;
 }
-.sidebar-title { color: #e0edf8; font-size: 1rem; font-weight: 600; margin: 1rem 0 0.5rem; }
+.sidebar-title { 
+    color: #e0edf8; 
+    font-size: 1rem; 
+    font-weight: 600; 
+    margin: 1.2rem 0 0.6rem; 
+    display: block !important;
+}
 
 /* Hide branding */
 #MainMenu, footer, header { visibility: hidden; }
@@ -270,6 +296,17 @@ input[type="text"]::placeholder { color: #3a5570 !important; }
     color: #7ab8f5 !important;
     padding: 0.15em 0.4em;
     border-radius: 4px;
+}
+
+/* Status widget content markdown */
+[data-testid="stStatusWidget"] .stMarkdown p,
+[data-testid="stStatusWidget"] .stMarkdown li {
+    color: #e0edf8 !important;
+    line-height: 1.6;
+}
+[data-testid="stStatusWidget"] .stMarkdown code {
+    background: rgba(58, 123, 213, 0.2) !important;
+    color: #7ab8f5 !important;
 }
 
 /* Metric labels — was #5a7a96 (too dim on dark bg) */
@@ -364,7 +401,7 @@ for qc, label in zip(qcols, QUICK):
             quick_fill = label
 
 user_query = st.text_area(
-    "",
+    "Trip Details",
     value=quick_fill,
     placeholder="e.g. Plan a complete 7-day Japan trip including flights, hotels and sightseeing under ₹2 lakhs",
     height=100,
@@ -408,7 +445,7 @@ if generate:
             for node_name, state_update in chunk.items():
                 icon, label = AGENT_META.get(node_name, ("🔧", node_name))
 
-                with st.status(f"{icon}  {label}", state="complete", expanded=True):
+                with st.status(f"{icon}  {label}", state="running", expanded=True):
                     if node_name == "flight_agent":
                         text = state_update.get("flight_results", "")
                         collected["flight_results"] = text
