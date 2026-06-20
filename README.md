@@ -22,6 +22,31 @@ The system uses 4 AI agents that work together to plan a complete trip automatic
 
 ---
 
+## 🐳 Quick Start with Docker
+
+Want to get up and running quickly without manual setup? Use Docker!
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### One Command Setup
+```bash
+# Clone or navigate to project directory
+# Create .env file with your API keys
+cp .env.example .env
+
+# Start everything (builds image, starts PostgreSQL, and Streamlit)
+docker-compose up --build
+```
+
+Then visit: **http://localhost:8501**
+
+### For More Docker Details
+See [DOCKER.md](DOCKER.md) for comprehensive Docker documentation, troubleshooting, and advanced usage.
+
+---
+
 # Tech Stack
 
 - LangGraph
