@@ -8,6 +8,8 @@ The system uses 4 AI agents that work together to plan a complete trip automatic
 
 ![Multi-AI Agent Architecture](multi-ai-agent-architecture.png)
 
+![app screenshot](app-screenshot.jpg)
+
 ## Features
 
 - ✈️ Flight Search Agent

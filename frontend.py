@@ -392,17 +392,21 @@ st.markdown("<br>", unsafe_allow_html=True)
 # ── Input ─────────────────────────────────────────────────────────────────────
 st.markdown("<div class='input-label'>🗺️ Describe your trip</div>", unsafe_allow_html=True)
 
+# Initialize session state
+if "quick_fill" not in st.session_state:
+    st.session_state.quick_fill = ""
+
 QUICK = ["7-day Japan under ₹2L", "Paris trip for 5 days", "Dubai weekend trip", "Bali backpacking 10 days"]
 qcols = st.columns(len(QUICK))
-quick_fill = ""
 for qc, label in zip(qcols, QUICK):
     with qc:
-        if st.button(label, key=f"q_{label}"):
-            quick_fill = label
+        if st.button(label, key=f"q_{label}", use_container_width=True):
+            st.session_state.quick_fill = label
+            st.rerun()
 
 user_query = st.text_area(
     "Trip Details",
-    value=quick_fill,
+    value=st.session_state.quick_fill,
     placeholder="e.g. Plan a complete 7-day Japan trip including flights, hotels and sightseeing under ₹2 lakhs",
     height=100,
     label_visibility="collapsed",
