@@ -1,0 +1,106 @@
+name: Build and publish Docker image
+
+on:
+  workflow_dispatch:
+    inputs:
+      registry:
+        description: Select the container registry
+        required: true
+        default: ghcr
+        type: choice
+        options:
+          - ghcr
+          - acr
+          - ecr
+          - gcr
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ${{ github.event_name == 'workflow_dispatch' && inputs.registry || 'ghcr' }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set image name
+        run: |
+          if [ "$REGISTRY" = "ghcr" ]; then
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            echo "IMAGE_NAME=ghcr.io/${OWNER}/multiagent-travel-assistant" >> "$GITHUB_ENV"
+          elif [ "$REGISTRY" = "acr" ]; then
+            echo "IMAGE_NAME=${{ secrets.ACR_REGISTRY }}/multiagent-travel-assistant" >> "$GITHUB_ENV"
+          elif [ "$REGISTRY" = "ecr" ]; then
+            echo "IMAGE_NAME=${{ secrets.ECR_REGISTRY }}/multiagent-travel-assistant" >> "$GITHUB_ENV"
+          else
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            echo "IMAGE_NAME=gcr.io/${OWNER}/multiagent-travel-assistant" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: github.event_name != 'workflow_dispatch' || inputs.registry == 'ghcr'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_ACCESS_TOKEN }}
+
+      - name: Log in to ACR
+        if: github.event_name == 'workflow_dispatch' && inputs.registry == 'acr'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Log in to ECR
+        if: github.event_name == 'workflow_dispatch' && inputs.registry == 'ecr'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ECR_REGISTRY }}
+          username: ${{ secrets.ECR_USERNAME }}
+          password: ${{ secrets.ECR_PASSWORD }}
+
+      - name: Log in to GCR
+        if: github.event_name == 'workflow_dispatch' && inputs.registry == 'gcr'
+        uses: docker/login-action@v3
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCR_JSON_KEY }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
